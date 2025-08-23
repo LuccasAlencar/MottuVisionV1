@@ -1,0 +1,6 @@
+@MottuVision_HostAddress = http://localhost:5111
+
+GET {{MottuVision_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -3312,11 +3312,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\lucca\\RiderProjects\\MottuVision\\MottuVision\\MottuVision.csproj",
+      "projectUniqueName": "C:\\Users\\lucca\\RiderProjects\\MottuVisionV1\\MottuVision.csproj",
       "projectName": "MottuVision",
-      "projectPath": "C:\\Users\\lucca\\RiderProjects\\MottuVision\\MottuVision\\MottuVision.csproj",
+      "projectPath": "C:\\Users\\lucca\\RiderProjects\\MottuVisionV1\\MottuVision.csproj",
       "packagesPath": "C:\\Users\\lucca\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\lucca\\RiderProjects\\MottuVision\\MottuVision\\obj\\",
+      "outputPath": "C:\\Users\\lucca\\RiderProjects\\MottuVisionV1\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\lucca\\AppData\\Roaming\\NuGet\\NuGet.Config"
@@ -3342,7 +3342,8 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net8.0": {
@@ -3398,7 +3399,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.413/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

@@ -42,7 +42,15 @@ var app = builder.Build();
 //  seeder/migração
 using (var scope = app.Services.CreateScope())
 {
-    
+    try 
+    {
+        await MottuVision.Api.DatabaseInitializer.EnsureCreatedAndSeedAsync(scope.ServiceProvider);
+        Console.WriteLine("✅ Database inicializado com sucesso!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"❌ Erro ao inicializar database: {ex.Message}");
+    }
 }
 
 app.UseSwagger();
@@ -478,23 +486,31 @@ motos.MapGet("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal id) 
 
 // POST /api/motos
 motos.MapPost("/", async Task<IResult> (AppDbContext db, MotoCreateDto dto) =>
-{
-    if (!await db.Zonas.AnyAsync(z => z.Id == dto.ZonaId))   return TypedResults.BadRequest("ZonaId inválido.");
-    if (!await db.Patios.AnyAsync(p => p.Id == dto.PatioId))  return TypedResults.BadRequest("PatioId inválido.");
-    if (!await db.Statuses.AnyAsync(s => s.Id == dto.StatusId)) return TypedResults.BadRequest("StatusId inválido.");
-    if (await db.Motos.AnyAsync(m => m.Placa == dto.Placa))   return TypedResults.BadRequest("Placa já cadastrada.");
-    if (await db.Motos.AnyAsync(m => m.Chassi == dto.Chassi)) return TypedResults.BadRequest("Chassi já cadastrado.");
-
-    var entity = new Moto
     {
-        Id = await NextIdAsync(db, "moto"),
-        Placa = dto.Placa, Chassi = dto.Chassi, QrCode = dto.QrCode,
-        ZonaId = dto.ZonaId, PatioId = dto.PatioId, StatusId = dto.StatusId
-    };
-    db.Motos.Add(entity);
-    await db.SaveChangesAsync();
-    return TypedResults.Created($"/api/motos/{entity.Id}", entity);
-})
+        if (!await db.Zonas.AnyAsync(z => z.Id == dto.ZonaId))   return TypedResults.BadRequest("ZonaId inválido.");
+        if (!await db.Patios.AnyAsync(p => p.Id == dto.PatioId))  return TypedResults.BadRequest("PatioId inválido.");
+        if (!await db.Statuses.AnyAsync(s => s.Id == dto.StatusId)) return TypedResults.BadRequest("StatusId inválido.");
+        if (await db.Motos.AnyAsync(m => m.Placa == dto.Placa))   return TypedResults.BadRequest("Placa já cadastrada.");
+        if (await db.Motos.AnyAsync(m => m.Chassi == dto.Chassi)) return TypedResults.BadRequest("Chassi já cadastrado.");
+
+        var entity = new Moto
+        {
+            Id = await NextIdAsync(db, "moto"),
+            Placa = dto.Placa, 
+            Chassi = dto.Chassi, 
+            QrCode = dto.QrCode,
+            DataEntrada = dto.DataEntrada,
+            PrevisaoEntrega = dto.PrevisaoEntrega,
+            Fotos = dto.Fotos,
+            ZonaId = dto.ZonaId, 
+            PatioId = dto.PatioId, 
+            StatusId = dto.StatusId,
+            Observacoes = dto.Observacoes
+        };
+        db.Motos.Add(entity);
+        await db.SaveChangesAsync();
+        return TypedResults.Created($"/api/motos/{entity.Id}", entity);
+    })
 .WithOpenApi(op =>
 {
     op.Summary = "Cria moto";

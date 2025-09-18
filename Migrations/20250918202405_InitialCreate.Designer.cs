@@ -12,7 +12,7 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace MottuVision.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250918152758_InitialCreate")]
+    [Migration("20250918202405_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

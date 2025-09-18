@@ -144,7 +144,7 @@ Informações completas das motocicletas
 ```bash
 # 1. Clone o repositório
 git clone [URL_DO_REPOSITORIO]
-cd MottuVision
+cd MottuVisionV1
 
 # 2. Restaurar dependências
 dotnet restore
@@ -171,7 +171,7 @@ dotnet run
 ```
 
 ### **Acesso à API:**
-- **URL Base:** `http://localhost:5000`
+- **URL Base:** `http://localhost:5111`
 
 ---
 

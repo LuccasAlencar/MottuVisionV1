@@ -131,6 +131,7 @@ C:\Users\lucca\RiderProjects\MottuVisionV1\bin\Debug\net8.0\MottuVision.deps.jso
 C:\Users\lucca\RiderProjects\MottuVisionV1\bin\Debug\net8.0\MottuVision.runtimeconfig.json
 C:\Users\lucca\RiderProjects\MottuVisionV1\bin\Debug\net8.0\MottuVision.dll
 C:\Users\lucca\RiderProjects\MottuVisionV1\bin\Debug\net8.0\MottuVision.pdb
+C:\Users\lucca\RiderProjects\MottuVisionV1\bin\Debug\net8.0\BCrypt.Net-Next.dll
 C:\Users\lucca\RiderProjects\MottuVisionV1\bin\Debug\net8.0\Humanizer.dll
 C:\Users\lucca\RiderProjects\MottuVisionV1\bin\Debug\net8.0\Microsoft.AspNetCore.OpenApi.dll
 C:\Users\lucca\RiderProjects\MottuVisionV1\bin\Debug\net8.0\Microsoft.Bcl.AsyncInterfaces.dll

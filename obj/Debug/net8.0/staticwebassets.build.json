@@ -1,11 +1,1 @@
-{
-  "Version": 1,
-  "Hash": "Om45I6ExRfF7xzppLNflaZICyB55HiJUUzdd3QjC4Kc=",
-  "Source": "MottuVision",
-  "BasePath": "_content/MottuVision",
-  "Mode": "Default",
-  "ManifestType": "Build",
-  "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
-}
+{"Version":1,"Hash":"rCDRRlFaZ7/qS5qMmgf5S14Ax8BN8dOIaBpzqxPUzfk=","Source":"MottuVision","BasePath":"_content/MottuVision","Mode":"Default","ManifestType":"Build","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[],"Assets":[],"Endpoints":[]}

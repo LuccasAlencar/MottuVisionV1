@@ -42,17 +42,17 @@ var app = builder.Build();
 //  seeder/migração
 using (var scope = app.Services.CreateScope())
 {
-    try 
+    try
     {
-        await MottuVision.Api.DatabaseInitializer.EnsureCreatedAndSeedAsync(scope.ServiceProvider);
-        Console.WriteLine("✅ Database inicializado com sucesso!");
+        await MottuVision.Api.DatabaseSeeder.SeedAsync(scope.ServiceProvider);
     }
     catch (Exception ex)
     {
-        Console.WriteLine($"❌ Erro ao inicializar database: {ex.Message}");
+        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+        logger.LogError(ex, "❌ Erro ao popular dados iniciais");
+        
     }
 }
-
 app.UseSwagger();
 app.UseSwaggerUI();
 

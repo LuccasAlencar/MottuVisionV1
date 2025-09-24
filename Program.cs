@@ -173,6 +173,29 @@ usuarios.MapPost("/", async Task<IResult> (AppDbContext db, UsuarioCreateDto dto
 {
     op.Summary = "Cria usuário";
     op.Description = "Cria um novo usuário no sistema";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Schema = new OpenApiSchema
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.Schema,
+                        Id = nameof(UsuarioCreateDto)
+                    }
+                },
+                Example = new OpenApiObject
+                {
+                    ["usuario"] = new OpenApiString("admin"),
+                    ["senha"] = new OpenApiString("admin@123")
+                }
+            }
+        }
+    };
     return op;
 });
 
@@ -195,6 +218,29 @@ usuarios.MapPut("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal i
 {
     op.Summary = "Atualiza usuário";
     op.Description = "Atualiza um usuário existente";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Schema = new OpenApiSchema
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.Schema,
+                        Id = nameof(UsuarioUpdateDto)
+                    }
+                },
+                Example = new OpenApiObject
+                {
+                    ["usuario"] = new OpenApiString("admin_updated"),
+                    ["senha"] = new OpenApiString("nova_senha@123")
+                }
+            }
+        }
+    };
     return op;
 });
 
@@ -276,6 +322,29 @@ zonas.MapPost("/", async Task<IResult> (AppDbContext db, ZonaCreateDto dto) =>
 {
     op.Summary = "Cria zona";
     op.Description = "Cria uma nova zona no sistema";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Schema = new OpenApiSchema
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.Schema,
+                        Id = nameof(ZonaCreateDto)
+                    }
+                },
+                Example = new OpenApiObject
+                {
+                    ["nome"] = new OpenApiString("Zona Norte"),
+                    ["letra"] = new OpenApiString("N")
+                }
+            }
+        }
+    };
     return op;
 });
 
@@ -297,6 +366,29 @@ zonas.MapPut("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal id, 
 {
     op.Summary = "Atualiza zona";
     op.Description = "Atualiza uma zona existente";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Schema = new OpenApiSchema
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.Schema,
+                        Id = nameof(ZonaUpdateDto)
+                    }
+                },
+                Example = new OpenApiObject
+                {
+                    ["nome"] = new OpenApiString("Zona Sul"),
+                    ["letra"] = new OpenApiString("S")
+                }
+            }
+        }
+    };
     return op;
 });
 
@@ -380,6 +472,28 @@ patios.MapPost("/", async Task<IResult> (AppDbContext db, PatioCreateDto dto) =>
 {
     op.Summary = "Cria pátio";
     op.Description = "Cria um novo pátio no sistema";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Schema = new OpenApiSchema
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.Schema,
+                        Id = nameof(PatioCreateDto)
+                    }
+                },
+                Example = new OpenApiObject
+                {
+                    ["nome"] = new OpenApiString("Pátio Central SP")
+                }
+            }
+        }
+    };
     return op;
 });
 
@@ -400,6 +514,28 @@ patios.MapPut("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal id,
 {
     op.Summary = "Atualiza pátio";
     op.Description = "Atualiza um pátio existente";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Schema = new OpenApiSchema
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.Schema,
+                        Id = nameof(PatioUpdateDto)
+                    }
+                },
+                Example = new OpenApiObject
+                {
+                    ["nome"] = new OpenApiString("Pátio Guarulhos Atualizado")
+                }
+            }
+        }
+    };
     return op;
 });
 
@@ -493,6 +629,28 @@ statusGrupos.MapPost("/", async Task<IResult> (AppDbContext db, StatusGrupoCreat
 {
     op.Summary = "Cria status grupo";
     op.Description = "Cria um novo grupo de status no sistema";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Schema = new OpenApiSchema
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.Schema,
+                        Id = nameof(StatusGrupoCreateDto)
+                    }
+                },
+                Example = new OpenApiObject
+                {
+                    ["nome"] = new OpenApiString("Operacional")
+                }
+            }
+        }
+    };
     return op;
 });
 
@@ -513,6 +671,28 @@ statusGrupos.MapPut("/{id:decimal}", async Task<IResult> (AppDbContext db, decim
 {
     op.Summary = "Atualiza status grupo";
     op.Description = "Atualiza um grupo de status existente";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Schema = new OpenApiSchema
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.Schema,
+                        Id = nameof(StatusGrupoUpdateDto)
+                    }
+                },
+                Example = new OpenApiObject
+                {
+                    ["nome"] = new OpenApiString("Manutenção")
+                }
+            }
+        }
+    };
     return op;
 });
 
@@ -627,6 +807,29 @@ statuses.MapPost("/", async Task<IResult> (AppDbContext db, StatusCreateDto dto)
 {
     op.Summary = "Cria status";
     op.Description = "Cria um novo status no sistema";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Schema = new OpenApiSchema
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.Schema,
+                        Id = nameof(StatusCreateDto)
+                    }
+                },
+                Example = new OpenApiObject
+                {
+                    ["nome"] = new OpenApiString("Disponível"),
+                    ["statusGrupoId"] = new OpenApiInteger(1)
+                }
+            }
+        }
+    };
     return op;
 });
 
@@ -660,6 +863,29 @@ statuses.MapPut("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal i
 {
     op.Summary = "Atualiza status";
     op.Description = "Atualiza um status existente";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Schema = new OpenApiSchema
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.Schema,
+                        Id = nameof(StatusUpdateDto)
+                    }
+                },
+                Example = new OpenApiObject
+                {
+                    ["nome"] = new OpenApiString("Em Manutenção"),
+                    ["statusGrupoId"] = new OpenApiInteger(2)
+                }
+            }
+        }
+    };
     return op;
 });
 
@@ -859,6 +1085,37 @@ motos.MapPost("/", async Task<IResult> (AppDbContext db, MotoCreateDto dto) =>
 {
     op.Summary = "Cria moto";
     op.Description = "Cria uma nova moto no sistema";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Schema = new OpenApiSchema
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.Schema,
+                        Id = nameof(MotoCreateDto)
+                    }
+                },
+                Example = new OpenApiObject
+                {
+                    ["placa"] = new OpenApiString("ABC1D23"),
+                    ["chassi"] = new OpenApiString("9BWZZZ377VT004251"),
+                    ["qrCode"] = new OpenApiString("QR001"),
+                    ["dataEntrada"] = new OpenApiString("2024-11-20T10:30:00"),
+                    ["previsaoEntrega"] = new OpenApiString("2024-11-25T18:00:00"),
+                    ["fotos"] = new OpenApiString("foto1.jpg,foto2.jpg"),
+                    ["zonaId"] = new OpenApiInteger(1),
+                    ["patioId"] = new OpenApiInteger(1),
+                    ["statusId"] = new OpenApiInteger(1),
+                    ["observacoes"] = new OpenApiString("Honda CG 160 - Excelente estado")
+                }
+            }
+        }
+    };
     return op;
 });
 
@@ -928,6 +1185,37 @@ motos.MapPut("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal id, 
 {
     op.Summary = "Atualiza moto";
     op.Description = "Atualiza uma moto existente";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Schema = new OpenApiSchema
+                {
+                    Reference = new OpenApiReference
+                    {
+                        Type = ReferenceType.Schema,
+                        Id = nameof(MotoUpdateDto)
+                    }
+                },
+                Example = new OpenApiObject
+                {
+                    ["placa"] = new OpenApiString("XYZ9W88"),
+                    ["chassi"] = new OpenApiString("9BWZZZ377VT009999"),
+                    ["qrCode"] = new OpenApiString("QR999"),
+                    ["dataEntrada"] = new OpenApiString("2024-11-20T10:30:00"),
+                    ["previsaoEntrega"] = new OpenApiString("2024-11-30T15:00:00"),
+                    ["fotos"] = new OpenApiString("foto_atualizada.jpg"),
+                    ["zonaId"] = new OpenApiInteger(2),
+                    ["patioId"] = new OpenApiInteger(2),
+                    ["statusId"] = new OpenApiInteger(2),
+                    ["observacoes"] = new OpenApiString("Yamaha Factor 125 - Transferida para zona sul")
+                }
+            }
+        }
+    };
     return op;
 });
 

@@ -258,8 +258,8 @@ auth.MapPost("/login", async (AppDbContext db, JwtService jwtService, LoginReque
     if (usuario == null)
         return Results.Unauthorized();
     
-    // Em produção, usar BCrypt para validar senha
-    if (usuario.SenhaHash != dto.Senha)
+    // Validar senha usando BCrypt
+    if (!BCrypt.Net.BCrypt.Verify(dto.Senha, usuario.SenhaHash))
         return Results.Unauthorized();
     
     var token = jwtService.GenerateToken(usuario.NomeUsuario, usuario.Id.ToString());

@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MottuVision.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialCreatee : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,7 +15,7 @@ namespace MottuVision.Migrations
                 name: "patio",
                 columns: table => new
                 {
-                    id = table.Column<decimal>(type: "DECIMAL(18, 2)", nullable: false),
+                    id = table.Column<decimal>(type: "DECIMAL(10,0)", precision: 10, scale: 0, nullable: false),
                     nome = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
@@ -27,7 +27,7 @@ namespace MottuVision.Migrations
                 name: "status_grupo",
                 columns: table => new
                 {
-                    id = table.Column<decimal>(type: "DECIMAL(18, 2)", nullable: false),
+                    id = table.Column<decimal>(type: "DECIMAL(10,0)", precision: 10, scale: 0, nullable: false),
                     nome = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
@@ -39,7 +39,7 @@ namespace MottuVision.Migrations
                 name: "usuario",
                 columns: table => new
                 {
-                    id = table.Column<decimal>(type: "DECIMAL(18, 2)", nullable: false),
+                    id = table.Column<decimal>(type: "DECIMAL(10,0)", precision: 10, scale: 0, nullable: false),
                     usuario = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: false),
                     senha = table.Column<string>(type: "NVARCHAR2(255)", maxLength: 255, nullable: false)
                 },
@@ -52,7 +52,7 @@ namespace MottuVision.Migrations
                 name: "zona",
                 columns: table => new
                 {
-                    id = table.Column<decimal>(type: "DECIMAL(18, 2)", nullable: false),
+                    id = table.Column<decimal>(type: "DECIMAL(10,0)", precision: 10, scale: 0, nullable: false),
                     nome = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: false),
                     letra = table.Column<string>(type: "NVARCHAR2(1)", maxLength: 1, nullable: false)
                 },
@@ -65,9 +65,9 @@ namespace MottuVision.Migrations
                 name: "status",
                 columns: table => new
                 {
-                    id = table.Column<decimal>(type: "DECIMAL(18, 2)", nullable: false),
+                    id = table.Column<decimal>(type: "DECIMAL(10,0)", precision: 10, scale: 0, nullable: false),
                     nome = table.Column<string>(type: "NVARCHAR2(50)", maxLength: 50, nullable: false),
-                    status_grupo_id = table.Column<decimal>(type: "DECIMAL(18, 2)", nullable: false)
+                    status_grupo_id = table.Column<decimal>(type: "DECIMAL(10,0)", precision: 10, scale: 0, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -84,16 +84,16 @@ namespace MottuVision.Migrations
                 name: "moto",
                 columns: table => new
                 {
-                    id = table.Column<decimal>(type: "DECIMAL(18, 2)", nullable: false),
+                    id = table.Column<decimal>(type: "DECIMAL(10,0)", precision: 10, scale: 0, nullable: false),
                     placa = table.Column<string>(type: "NVARCHAR2(10)", maxLength: 10, nullable: false),
                     chassi = table.Column<string>(type: "NVARCHAR2(20)", maxLength: 20, nullable: false),
                     qr_code = table.Column<string>(type: "NVARCHAR2(255)", maxLength: 255, nullable: true),
                     data_entrada = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: false),
                     previsao_entrega = table.Column<DateTime>(type: "TIMESTAMP(7)", nullable: true),
                     fotos = table.Column<string>(type: "NVARCHAR2(255)", maxLength: 255, nullable: true),
-                    zona_id = table.Column<decimal>(type: "DECIMAL(18, 2)", nullable: false),
-                    patio_id = table.Column<decimal>(type: "DECIMAL(18, 2)", nullable: false),
-                    status_id = table.Column<decimal>(type: "DECIMAL(18, 2)", nullable: false),
+                    zona_id = table.Column<decimal>(type: "DECIMAL(10,0)", precision: 10, scale: 0, nullable: false),
+                    patio_id = table.Column<decimal>(type: "DECIMAL(10,0)", precision: 10, scale: 0, nullable: false),
+                    status_id = table.Column<decimal>(type: "DECIMAL(10,0)", precision: 10, scale: 0, nullable: false),
                     observacoes = table.Column<string>(type: "NVARCHAR2(2000)", nullable: true)
                 },
                 constraints: table =>

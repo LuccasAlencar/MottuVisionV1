@@ -12,8 +12,8 @@ using Oracle.EntityFrameworkCore.Metadata;
 namespace MottuVision.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250918202405_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20251107014017_InitialCreatee")]
+    partial class InitialCreatee
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,7 +28,8 @@ namespace MottuVision.Migrations
             modelBuilder.Entity("MottuVision.Models.Moto", b =>
                 {
                     b.Property<decimal>("Id")
-                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasPrecision(10)
+                        .HasColumnType("DECIMAL(10,0)")
                         .HasColumnName("id");
 
                     b.Property<string>("Chassi")
@@ -51,7 +52,8 @@ namespace MottuVision.Migrations
                         .HasColumnName("observacoes");
 
                     b.Property<decimal>("PatioId")
-                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasPrecision(10)
+                        .HasColumnType("DECIMAL(10,0)")
                         .HasColumnName("patio_id");
 
                     b.Property<string>("Placa")
@@ -70,11 +72,13 @@ namespace MottuVision.Migrations
                         .HasColumnName("qr_code");
 
                     b.Property<decimal>("StatusId")
-                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasPrecision(10)
+                        .HasColumnType("DECIMAL(10,0)")
                         .HasColumnName("status_id");
 
                     b.Property<decimal>("ZonaId")
-                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasPrecision(10)
+                        .HasColumnType("DECIMAL(10,0)")
                         .HasColumnName("zona_id");
 
                     b.HasKey("Id")
@@ -100,7 +104,8 @@ namespace MottuVision.Migrations
             modelBuilder.Entity("MottuVision.Models.Patio", b =>
                 {
                     b.Property<decimal>("Id")
-                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasPrecision(10)
+                        .HasColumnType("DECIMAL(10,0)")
                         .HasColumnName("id");
 
                     b.Property<string>("Nome")
@@ -118,7 +123,8 @@ namespace MottuVision.Migrations
             modelBuilder.Entity("MottuVision.Models.Status", b =>
                 {
                     b.Property<decimal>("Id")
-                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasPrecision(10)
+                        .HasColumnType("DECIMAL(10,0)")
                         .HasColumnName("id");
 
                     b.Property<string>("Nome")
@@ -128,7 +134,8 @@ namespace MottuVision.Migrations
                         .HasColumnName("nome");
 
                     b.Property<decimal>("StatusGrupoId")
-                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasPrecision(10)
+                        .HasColumnType("DECIMAL(10,0)")
                         .HasColumnName("status_grupo_id");
 
                     b.HasKey("Id")
@@ -142,7 +149,8 @@ namespace MottuVision.Migrations
             modelBuilder.Entity("MottuVision.Models.StatusGrupo", b =>
                 {
                     b.Property<decimal>("Id")
-                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasPrecision(10)
+                        .HasColumnType("DECIMAL(10,0)")
                         .HasColumnName("id");
 
                     b.Property<string>("Nome")
@@ -160,7 +168,8 @@ namespace MottuVision.Migrations
             modelBuilder.Entity("MottuVision.Models.Usuario", b =>
                 {
                     b.Property<decimal>("Id")
-                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasPrecision(10)
+                        .HasColumnType("DECIMAL(10,0)")
                         .HasColumnName("id");
 
                     b.Property<string>("NomeUsuario")
@@ -188,7 +197,8 @@ namespace MottuVision.Migrations
             modelBuilder.Entity("MottuVision.Models.Zona", b =>
                 {
                     b.Property<decimal>("Id")
-                        .HasColumnType("DECIMAL(18, 2)")
+                        .HasPrecision(10)
+                        .HasColumnType("DECIMAL(10,0)")
                         .HasColumnName("id");
 
                     b.Property<string>("Letra")

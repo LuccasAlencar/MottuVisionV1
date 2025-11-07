@@ -4,8 +4,15 @@ using Microsoft.OpenApi.Any;
 using MottuVision.Data;
 using MottuVision.Models;
 using MottuVision.Dtos;
+using MottuVision.Services;
 using System.Data;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Asp.Versioning;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +32,53 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseOracle(cs);
 });
 
+// Serviços personalizados
+builder.Services.AddSingleton<JwtService>();
+builder.Services.AddSingleton<MotoPrevisaoService>();
+
+// Health Checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<AppDbContext>("database");
+
+// JWT Authentication
+var jwtKey = builder.Configuration["Jwt:Key"] 
+    ?? throw new InvalidOperationException("JWT Key não configurada");
+var key = Encoding.UTF8.GetBytes(jwtKey);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+});
+
+builder.Services.AddAuthorization();
+
+// API Versioning
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+}).AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opt =>
 {
@@ -32,7 +86,70 @@ builder.Services.AddSwaggerGen(opt =>
     {
         Title = "Mottu Vision API",
         Version = "v1",
-        Description = "API RESTful (.NET 8 Minimal API) com boas práticas, paginação, HATEOAS e exemplos."
+        Description = @"
+# API RESTful para Gerenciamento de Pátio de Motocicletas
+
+## Sobre
+API desenvolvida em .NET 8 Minimal API seguindo as melhores práticas REST e padrões HTTP.
+
+## Características
+- REST compliant - Verbos HTTP corretos (GET, POST, PUT, DELETE)
+- Status Codes adequados - 200, 201, 204, 400, 404, 409, 500
+- HATEOAS - Links de navegação em respostas paginadas
+- Paginação - Suporte a paginação em todas as listagens
+- Validações - Validação de dados e integridade referencial
+- Content Negotiation - application/json
+- JWT Authentication - Autenticação via Bearer token
+- Health Checks - Monitoramento de saúde da API
+- ML.NET - Previsões de Machine Learning
+
+## Status Codes Utilizados
+| Code | Significado | Uso |
+|------|-------------|-----|
+| 200 | OK | Sucesso em GET e PUT |
+| 201 | Created | Recurso criado com sucesso (POST) |
+| 204 | No Content | Sucesso em DELETE (sem corpo de resposta) |
+| 400 | Bad Request | Dados inválidos ou violação de regras |
+| 401 | Unauthorized | Não autenticado |
+| 404 | Not Found | Recurso não encontrado |
+| 409 | Conflict | Conflito (ex: duplicação de dados únicos) |
+| 500 | Internal Server Error | Erro interno do servidor |",
+        Contact = new OpenApiContact
+        {
+            Name = "Equipe MottuVision",
+            Email = "contato@mottuvision.com"
+        },
+        License = new OpenApiLicense
+        {
+            Name = "MIT License",
+            Url = new Uri("https://opensource.org/licenses/MIT")
+        }
+    });
+    
+    // Configuração JWT no Swagger
+    opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Exemplo: \"Bearer {token}\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
+    });
+
+    opt.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
     });
     
     opt.EnableAnnotations();
@@ -60,6 +177,43 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Mottu Vision API v1");
     c.RoutePrefix = "swagger";
 });
+
+// Middleware de autenticação e autorização
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Health Checks
+app.MapHealthChecks("/health", new HealthCheckOptions
+{
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        var result = JsonSerializer.Serialize(new
+        {
+            status = report.Status.ToString(),
+            checks = report.Entries.Select(e => new
+            {
+                name = e.Key,
+                status = e.Value.Status.ToString(),
+                description = e.Value.Description,
+                duration = e.Value.Duration.TotalMilliseconds
+            }),
+            totalDuration = report.TotalDuration.TotalMilliseconds
+        });
+        await context.Response.WriteAsync(result);
+    }
+}).WithTags("Health Checks")
+  .WithOpenApi(op =>
+  {
+      op.Summary = "Health Check da API";
+      op.Description = @"Verifica o status de saúde da API e suas dependências.
+      
+**Status possíveis:**
+- `Healthy`: Todos os checks passaram
+- `Degraded`: Alguns checks falharam mas o sistema ainda funciona
+- `Unhealthy`: Checks críticos falharam";
+      return op;
+  });
 
 app.MapGet("/", () => Results.Redirect("/swagger"));
 
@@ -94,6 +248,135 @@ static async Task<decimal> NextIdAsync(AppDbContext db, string table)
     return result == DBNull.Value ? 1 : Convert.ToDecimal(result);
 }
 
+// ================== AUTENTICAÇÃO (JWT) ==================
+var auth = app.MapGroup("/api/auth").WithTags("Autenticação");
+
+auth.MapPost("/login", async (AppDbContext db, JwtService jwtService, LoginRequestDto dto) =>
+{
+    var usuario = await db.Usuarios.FirstOrDefaultAsync(u => u.NomeUsuario == dto.Usuario);
+    
+    if (usuario == null)
+        return Results.Unauthorized();
+    
+    // Em produção, usar BCrypt para validar senha
+    if (usuario.SenhaHash != dto.Senha)
+        return Results.Unauthorized();
+    
+    var token = jwtService.GenerateToken(usuario.NomeUsuario, usuario.Id.ToString());
+    var response = new LoginResponseDto(token, usuario.NomeUsuario, DateTime.UtcNow.AddHours(2));
+    
+    return Results.Ok(response);
+})
+.WithName("Login")
+.WithOpenApi(op =>
+{
+    op.Summary = "Login com JWT";
+    op.Description = @"Autentica um usuário e retorna um token JWT.
+
+**Como usar:**
+1. Faça login com este endpoint
+2. Copie o token retornado
+3. Clique em 'Authorize' no Swagger
+4. Cole o token (sem 'Bearer ')
+5. Use as APIs protegidas
+
+**Status Codes:**
+- `200 OK`: Login bem-sucedido, retorna token JWT
+- `401 Unauthorized`: Credenciais inválidas";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Example = new OpenApiObject
+                {
+                    ["usuario"] = new OpenApiString("admin"),
+                    ["senha"] = new OpenApiString("admin@123")
+                }
+            }
+        }
+    };
+    op.Responses["200"] = new OpenApiResponse { Description = "Login bem-sucedido" };
+    op.Responses["401"] = new OpenApiResponse { Description = "Credenciais inválidas" };
+    return op;
+})
+.AllowAnonymous();
+
+// ================== ML.NET - PREVISÃO ==================
+var mlnet = app.MapGroup("/api/ml").WithTags("Machine Learning");
+
+mlnet.MapPost("/previsao-permanencia", (MotoPrevisaoService mlService, PrevisaoRequestDto dto) =>
+{
+    try
+    {
+        var tempoHoras = mlService.PreverTempoPermanencia(
+            dto.ZonaId,
+            dto.PatioId,
+            dto.StatusId,
+            dto.DiaSemana
+        );
+
+        var tempoDias = (int)Math.Ceiling(tempoHoras / 24.0);
+        
+        var mensagem = tempoDias switch
+        {
+            <= 1 => "Moto deve sair em até 1 dia",
+            <= 3 => "Moto deve permanecer de 2 a 3 dias",
+            <= 7 => "Moto deve permanecer de 4 a 7 dias",
+            _ => "Moto deve permanecer mais de 7 dias"
+        };
+
+        var response = new PrevisaoResponseDto(tempoHoras, tempoDias, mensagem, dto);
+        return Results.Ok(response);
+    }
+    catch (Exception ex)
+    {
+        return Results.Problem($"Erro na previsão: {ex.Message}");
+    }
+})
+.WithName("PrevisaoPermanenciaMoto")
+.WithOpenApi(op =>
+{
+    op.Summary = "Prevê tempo de permanência de moto no pátio (ML.NET)";
+    op.Description = @"Usa Machine Learning (ML.NET) para prever quanto tempo uma moto ficará no pátio.
+
+**Modelo:** FastTree Regression
+**Entrada:** ZonaId, PatioId, StatusId, DiaSemana (0-6)
+**Saída:** Tempo previsto em horas e dias
+
+**Exemplo de uso:**
+- ZonaId=1, PatioId=1, StatusId=1, DiaSemana=1 → ~24-30 horas
+- ZonaId=2, PatioId=2, StatusId=2, DiaSemana=5 → ~96 horas
+
+**Status Codes:**
+- `200 OK`: Previsão realizada com sucesso
+- `400 Bad Request`: Dados inválidos
+- `500 Internal Server Error`: Erro no modelo ML";
+    op.RequestBody = new OpenApiRequestBody
+    {
+        Required = true,
+        Content = new Dictionary<string, OpenApiMediaType>
+        {
+            ["application/json"] = new OpenApiMediaType
+            {
+                Example = new OpenApiObject
+                {
+                    ["zonaId"] = new OpenApiInteger(1),
+                    ["patioId"] = new OpenApiInteger(1),
+                    ["statusId"] = new OpenApiInteger(1),
+                    ["diaSemana"] = new OpenApiInteger(1)
+                }
+            }
+        }
+    };
+    op.Responses["200"] = new OpenApiResponse { Description = "Previsão realizada com sucesso" };
+    op.Responses["500"] = new OpenApiResponse { Description = "Erro no modelo ML" };
+    return op;
+})
+.AllowAnonymous(); // ou .RequireAuthorization() para endpoints protegidos
+
 // ================== USUÁRIOS ==================
 var usuarios = app.MapGroup("/api/usuarios").WithTags("Usuários");
 
@@ -116,7 +399,11 @@ usuarios.MapGet("/", async (HttpContext ctx, AppDbContext db, int page = 1, int 
 .WithOpenApi(op =>
 {
     op.Summary = "Lista usuários paginado";
-    op.Description = "Retorna lista paginada de usuários com informações básicas";
+    op.Description = @"Retorna lista paginada de usuários com informações básicas.
+
+**Status Codes:**
+- `200 OK`: Lista retornada com sucesso (mesmo que vazia)
+- `400 Bad Request`: Parâmetros de paginação inválidos";
     op.Parameters.Add(new OpenApiParameter
     {
         Name = "page",
@@ -133,6 +420,7 @@ usuarios.MapGet("/", async (HttpContext ctx, AppDbContext db, int page = 1, int 
         Required = false,
         Schema = new OpenApiSchema { Type = "integer", Default = new OpenApiInteger(20) }
     });
+    op.Responses["200"].Description = "Lista de usuários retornada com sucesso";
     return op;
 });
 
@@ -146,7 +434,13 @@ usuarios.MapGet("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal i
 .WithOpenApi(op =>
 {
     op.Summary = "Obtém usuário por ID";
-    op.Description = "Retorna um usuário específico pelo ID";
+    op.Description = @"Retorna um usuário específico pelo ID.
+
+**Status Codes:**
+- `200 OK`: Usuário encontrado e retornado
+- `404 Not Found`: Usuário não existe com o ID fornecido";
+    op.Responses["200"].Description = "Usuário encontrado com sucesso";
+    op.Responses["404"] = new OpenApiResponse { Description = "Usuário não encontrado" };
     return op;
 });
 
@@ -172,7 +466,12 @@ usuarios.MapPost("/", async Task<IResult> (AppDbContext db, UsuarioCreateDto dto
 .WithOpenApi(op =>
 {
     op.Summary = "Cria usuário";
-    op.Description = "Cria um novo usuário no sistema";
+    op.Description = @"Cria um novo usuário no sistema.
+
+**Status Codes:**
+- `201 Created`: Usuário criado com sucesso. Retorna Location header com URI do recurso
+- `400 Bad Request`: Dados inválidos ou usuário já existe
+- `409 Conflict`: Conflito - nome de usuário já está em uso";
     op.RequestBody = new OpenApiRequestBody
     {
         Required = true,
@@ -196,6 +495,8 @@ usuarios.MapPost("/", async Task<IResult> (AppDbContext db, UsuarioCreateDto dto
             }
         }
     };
+    op.Responses["201"] = new OpenApiResponse { Description = "Usuário criado com sucesso" };
+    op.Responses["400"] = new OpenApiResponse { Description = "Dados inválidos ou usuário já existe" };
     return op;
 });
 
@@ -217,7 +518,12 @@ usuarios.MapPut("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal i
 .WithOpenApi(op =>
 {
     op.Summary = "Atualiza usuário";
-    op.Description = "Atualiza um usuário existente";
+    op.Description = @"Atualiza um usuário existente.
+
+**Status Codes:**
+- `200 OK`: Usuário atualizado com sucesso
+- `400 Bad Request`: Dados inválidos ou nome de usuário já está em uso por outro usuário
+- `404 Not Found`: Usuário não encontrado";
     op.RequestBody = new OpenApiRequestBody
     {
         Required = true,
@@ -241,6 +547,9 @@ usuarios.MapPut("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal i
             }
         }
     };
+    op.Responses["200"] = new OpenApiResponse { Description = "Usuário atualizado com sucesso" };
+    op.Responses["400"] = new OpenApiResponse { Description = "Dados inválidos" };
+    op.Responses["404"] = new OpenApiResponse { Description = "Usuário não encontrado" };
     return op;
 });
 
@@ -257,7 +566,13 @@ usuarios.MapDelete("/{id:decimal}", async Task<IResult> (AppDbContext db, decima
 .WithOpenApi(op =>
 {
     op.Summary = "Remove usuário";
-    op.Description = "Remove um usuário do sistema";
+    op.Description = @"Remove um usuário do sistema.
+
+**Status Codes:**
+- `204 No Content`: Usuário removido com sucesso (sem corpo de resposta)
+- `404 Not Found`: Usuário não encontrado";
+    op.Responses["204"] = new OpenApiResponse { Description = "Usuário removido com sucesso" };
+    op.Responses["404"] = new OpenApiResponse { Description = "Usuário não encontrado" };
     return op;
 });
 
@@ -961,7 +1276,11 @@ motos.MapGet("/", async (HttpContext ctx, AppDbContext db, int page = 1, int pag
 .WithOpenApi(op =>
 {
     op.Summary = "Lista motos paginado com filtro";
-    op.Description = "Retorna lista paginada de motos com opção de filtro por placa";
+    op.Description = @"Retorna lista paginada de motos com opção de filtro por placa.
+
+**Status Codes:**
+- `200 OK`: Lista retornada com sucesso (mesmo que vazia)
+- `400 Bad Request`: Parâmetros inválidos";
     op.Parameters.Add(new OpenApiParameter
     {
         Name = "placa",
@@ -970,6 +1289,7 @@ motos.MapGet("/", async (HttpContext ctx, AppDbContext db, int page = 1, int pag
         Required = false,
         Schema = new OpenApiSchema { Type = "string" }
     });
+    op.Responses["200"].Description = "Lista de motos retornada com sucesso";
     return op;
 });
 
@@ -1012,7 +1332,13 @@ motos.MapGet("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal id) 
 .WithOpenApi(op =>
 {
     op.Summary = "Obtém moto por ID";
-    op.Description = "Retorna uma moto específica pelo ID com todos os relacionamentos";
+    op.Description = @"Retorna uma moto específica pelo ID com todos os relacionamentos (Zona, Pátio, Status).
+
+**Status Codes:**
+- `200 OK`: Moto encontrada e retornada
+- `404 Not Found`: Moto não existe com o ID fornecido";
+    op.Responses["200"].Description = "Moto encontrada com sucesso";
+    op.Responses["404"] = new OpenApiResponse { Description = "Moto não encontrada" };
     return op;
 });
 
@@ -1084,7 +1410,15 @@ motos.MapPost("/", async Task<IResult> (AppDbContext db, MotoCreateDto dto) =>
 .WithOpenApi(op =>
 {
     op.Summary = "Cria moto";
-    op.Description = "Cria uma nova moto no sistema";
+    op.Description = @"Cria uma nova moto no sistema com validações de integridade.
+
+**Validações:**
+- Placa e Chassi devem ser únicos
+- ZonaId, PatioId e StatusId devem existir
+
+**Status Codes:**
+- `201 Created`: Moto criada com sucesso. Retorna Location header
+- `400 Bad Request`: Dados inválidos, placa/chassi duplicados ou IDs não encontrados";
     op.RequestBody = new OpenApiRequestBody
     {
         Required = true,
@@ -1116,6 +1450,8 @@ motos.MapPost("/", async Task<IResult> (AppDbContext db, MotoCreateDto dto) =>
             }
         }
     };
+    op.Responses["201"] = new OpenApiResponse { Description = "Moto criada com sucesso" };
+    op.Responses["400"] = new OpenApiResponse { Description = "Dados inválidos ou duplicados" };
     return op;
 });
 
@@ -1184,7 +1520,16 @@ motos.MapPut("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal id, 
 .WithOpenApi(op =>
 {
     op.Summary = "Atualiza moto";
-    op.Description = "Atualiza uma moto existente";
+    op.Description = @"Atualiza uma moto existente com validações de integridade.
+
+**Validações:**
+- Placa e Chassi devem ser únicos (exceto para a própria moto)
+- ZonaId, PatioId e StatusId devem existir
+
+**Status Codes:**
+- `200 OK`: Moto atualizada com sucesso
+- `400 Bad Request`: Dados inválidos, placa/chassi duplicados ou IDs não encontrados
+- `404 Not Found`: Moto não encontrada";
     op.RequestBody = new OpenApiRequestBody
     {
         Required = true,
@@ -1216,6 +1561,9 @@ motos.MapPut("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal id, 
             }
         }
     };
+    op.Responses["200"] = new OpenApiResponse { Description = "Moto atualizada com sucesso" };
+    op.Responses["400"] = new OpenApiResponse { Description = "Dados inválidos ou duplicados" };
+    op.Responses["404"] = new OpenApiResponse { Description = "Moto não encontrada" };
     return op;
 });
 
@@ -1232,7 +1580,13 @@ motos.MapDelete("/{id:decimal}", async Task<IResult> (AppDbContext db, decimal i
 .WithOpenApi(op =>
 {
     op.Summary = "Remove moto";
-    op.Description = "Remove uma moto do sistema";
+    op.Description = @"Remove uma moto do sistema.
+
+**Status Codes:**
+- `204 No Content`: Moto removida com sucesso (sem corpo de resposta)
+- `404 Not Found`: Moto não encontrada";
+    op.Responses["204"] = new OpenApiResponse { Description = "Moto removida com sucesso" };
+    op.Responses["404"] = new OpenApiResponse { Description = "Moto não encontrada" };
     return op;
 });
 

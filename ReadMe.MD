@@ -35,6 +35,118 @@ Sistema integrado que combina:
 
 ---
 
+## 🏗️ Arquitetura do Sistema
+
+### **Diagrama de Arquitetura (C4 - Nível de Contêiner)**
+
+```mermaid
+graph TB
+    subgraph "Cliente"
+        Client[🌐 Cliente HTTP/Browser<br/>Swagger UI / REST Client]
+    end
+    
+    subgraph "Camada de Aplicação"
+        API[⚡ MottuVision API<br/>.NET 8 Minimal API<br/>ASP.NET Core]
+    end
+    
+    subgraph "Camada de Dados"
+        EF[📦 Entity Framework Core<br/>ORM Layer]
+        DB[(🗄️ Oracle Database<br/>Persistência)]
+    end
+    
+    subgraph "Modelos de Domínio"
+        Models[📋 Domain Models<br/>Usuario, Zona, Patio<br/>StatusGrupo, Status, Moto]
+    end
+    
+    subgraph "DTOs e Contratos"
+        DTOs[📄 Data Transfer Objects<br/>Request/Response DTOs<br/>Paginação, HATEOAS]
+    end
+    
+    Client -->|HTTP/JSON| API
+    API -->|Usa| DTOs
+    API -->|Gerencia| Models
+    API -->|Acessa via| EF
+    EF -->|SQL/PL-SQL| DB
+    Models -.->|Mapeamento| EF
+    
+    style Client fill:#e1f5ff
+    style API fill:#fff4e1
+    style EF fill:#ffe1f5
+    style DB fill:#f0f0f0
+    style Models fill:#e1ffe1
+    style DTOs fill:#ffe1e1
+```
+
+### **Diagrama de Componentes da API**
+
+```mermaid
+graph LR
+    subgraph "API Endpoints"
+        U[👤 /api/usuarios]
+        Z[📍 /api/zonas]
+        P[🏢 /api/patios]
+        SG[📊 /api/statusgrupos]
+        S[✅ /api/statuses]
+        M[🏍️ /api/motos]
+    end
+    
+    subgraph "Middleware Pipeline"
+        Swagger[📖 Swagger/OpenAPI]
+        JSON[🔄 JSON Serialization]
+        Error[⚠️ Error Handling]
+    end
+    
+    subgraph "Camada de Acesso a Dados"
+        Context[AppDbContext]
+    end
+    
+    U --> Context
+    Z --> Context
+    P --> Context
+    SG --> Context
+    S --> Context
+    M --> Context
+    
+    Swagger -.-> U
+    Swagger -.-> Z
+    Swagger -.-> P
+    Swagger -.-> SG
+    Swagger -.-> S
+    Swagger -.-> M
+    
+    style U fill:#90caf9
+    style Z fill:#a5d6a7
+    style P fill:#fff59d
+    style SG fill:#ffab91
+    style S fill:#ce93d8
+    style M fill:#ef9a9a
+```
+
+### **Fluxo de uma Requisição Típica**
+
+```mermaid
+sequenceDiagram
+    participant C as Cliente
+    participant API as MottuVision API
+    participant EF as Entity Framework
+    participant DB as Oracle Database
+    
+    C->>API: POST /api/motos (JSON)
+    API->>API: Validar DTO
+    API->>EF: Verificar relacionamentos<br/>(Zona, Patio, Status)
+    EF->>DB: SELECT queries
+    DB-->>EF: Dados encontrados
+    EF-->>API: Entidades válidas
+    API->>API: Criar entidade Moto
+    API->>EF: SaveChangesAsync()
+    EF->>DB: INSERT INTO moto
+    DB-->>EF: Commit OK
+    EF-->>API: Sucesso
+    API-->>C: 201 Created + Location Header<br/>+ JSON Response
+```
+
+---
+
 ## 🏗️ Justificativa da Arquitetura
 
 ### **Arquitetura Escolhida: Minimal API com Entity Framework Core**
@@ -62,6 +174,105 @@ Sistema integrado que combina:
    - **Padrões da indústria**: Seguindo melhores práticas REST
    - **Performance**: Paginação evita sobrecarga de dados
    - **Usabilidade**: HATEOAS facilita navegação na API
+
+---
+
+## 🎨 Melhorias Implementadas
+
+### ✅ 1. Health Checks (10 pts)
+Endpoint `/health` para monitoramento da saúde da API:
+- ✅ Verifica conexão com banco de dados Oracle
+- ✅ Retorna status detalhado (Healthy/Degraded/Unhealthy)
+- ✅ Informações de duração dos checks
+- ✅ Formato JSON estruturado
+
+**Uso:**
+```bash
+GET /health
+```
+
+### ✅ 2. Versionamento da API (10 pts)
+Implementação de versionamento seguindo boas práticas:
+- ✅ Versão padrão: v1.0
+- ✅ Suporte a múltiplas versões via URL
+- ✅ Header `api-supported-versions` nas respostas
+- ✅ Configuração extensível para futuras versões
+
+### ✅ 3. Autenticação JWT (25 pts)
+Segurança completa com JSON Web Tokens:
+- ✅ Endpoint `/api/auth/login` para autenticação
+- ✅ Geração de tokens JWT com expiração de 2 horas
+- ✅ Middleware de autenticação/autorização
+- ✅ Swagger integrado com botão "Authorize"
+- ✅ Claims: Nome de usuário e ID
+- ✅ Algoritmo: HS256
+
+**Como usar:**
+1. Faça login em `/api/auth/login`
+2. Copie o token retornado
+3. No Swagger, clique em "Authorize"
+4. Cole o token e confirme
+5. Agora você pode acessar endpoints protegidos
+
+### ✅ 4. Machine Learning com ML.NET (25 pts)
+Endpoint de previsão inteligente:
+- ✅ **Modelo:** SDCA Regression
+- ✅ **Objetivo:** Prever tempo de permanência da moto no pátio
+- ✅ **Entrada:** ZonaId, PatioId, StatusId, DiaSemana (0-6)
+- ✅ **Saída:** Tempo previsto em horas e dias + mensagem interpretativa
+- ✅ Treinamento automático com dados sintéticos
+- ✅ Endpoint `/api/ml/previsao-permanencia`
+
+**Exemplo de previsão:**
+```json
+POST /api/ml/previsao-permanencia
+{
+  "zonaId": 1,
+  "patioId": 1,
+  "statusId": 1,
+  "diaSemana": 1
+}
+
+Resposta:
+{
+  "tempoPrevistoHoras": 27.5,
+  "tempoPrevistoDias": 2,
+  "mensagem": "Moto deve permanecer de 2 a 3 dias",
+  "dadosEntrada": { ... }
+}
+```
+
+### ✅ 5. Diagrama de Arquitetura Completo
+Adicionamos **3 diagramas Mermaid JS** ao README para facilitar o entendimento da arquitetura:
+
+1. **Diagrama C4 (Nível de Contêiner)** - Visão de alto nível do sistema
+2. **Diagrama de Componentes** - Estrutura dos endpoints e middleware
+3. **Diagrama de Sequência** - Fluxo de requisição típica
+
+### ✅ 6. Documentação Swagger com Boas Práticas HTTP
+O Swagger foi completamente reformulado seguindo os padrões REST:
+
+**Status Codes Corretos:**
+- ✅ `200 OK` - GET e PUT bem-sucedidos
+- ✅ `201 Created` - POST com Location header
+- ✅ `204 No Content` - DELETE sem corpo de resposta
+- ✅ `400 Bad Request` - Validações e erros de dados
+- ✅ `401 Unauthorized` - Não autenticado
+- ✅ `404 Not Found` - Recurso não encontrado
+- ✅ `409 Conflict` - Conflitos de unicidade
+
+**Verbos HTTP:**
+- ✅ GET para leituras
+- ✅ POST para criações
+- ✅ PUT para atualizações completas
+- ✅ DELETE para remoções
+
+**Documentação Detalhada:**
+- ✅ Descrição completa de cada endpoint
+- ✅ Status codes documentados para sucesso e erro
+- ✅ Validações explicadas
+- ✅ Exemplos de requisição/resposta
+- ✅ Integração JWT com botão Authorize
 
 ---
 
@@ -112,16 +323,38 @@ Informações completas das motocicletas
 - **Entity Framework Core 8.0** - ORM para acesso a dados
 - **Oracle Database** - Banco de dados empresarial
 - **Swagger/OpenAPI** - Documentação interativa da API
+- **JWT (JSON Web Tokens)** - Autenticação e segurança
+- **ML.NET** - Machine Learning integrado
+- **Health Checks** - Monitoramento de saúde da API
+- **API Versioning** - Versionamento de endpoints
 - **C# 12** - Linguagem de programação
 
 ### Pacotes NuGet:
 ```xml
+<!-- Core -->
 <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
 <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8" />
 <PackageReference Include="Oracle.EntityFrameworkCore" Version="8.21.121" />
 <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="3.21.130" />
+
+<!-- Documentação -->
 <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 <PackageReference Include="Swashbuckle.AspNetCore.Annotations" Version="6.6.2" />
+
+<!-- Segurança -->
+<PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
+
+<!-- Health Checks -->
+<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.8" />
+
+<!-- API Versioning -->
+<PackageReference Include="Asp.Versioning.Http" Version="8.1.0" />
+<PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
+
+<!-- Machine Learning -->
+<PackageReference Include="Microsoft.ML" Version="3.0.1" />
 ```
 
 ---
@@ -179,27 +412,106 @@ dotnet run
 
 ### **Resumo dos Recursos Disponíveis:**
 
-| Entidade | Endpoints | Funcionalidades |
-|----------|-----------|----------------|
-| **Usuários** | `/api/usuarios` | CRUD completo, validação de usuário único |
-| **Zonas** | `/api/zonas` | CRUD completo, organização por letra |
-| **Pátios** | `/api/patios` | CRUD completo, validação de dependências |
-| **StatusGrupos** | `/api/statusgrupos` | CRUD completo, hierarquia de status |
-| **Status** | `/api/statuses` | CRUD completo, relacionamento com grupos |
-| **Motos** | `/api/motos` | CRUD completo, filtros, validações |
+| Categoria | Endpoint | Funcionalidades |
+|-----------|----------|----------------|
+| **🏥 Health** | `/health` | Monitoramento de saúde da API e banco de dados |
+| **🔐 Autenticação** | `/api/auth/login` | Login com JWT (25 pts) |
+| **🤖 Machine Learning** | `/api/ml/previsao-permanencia` | Previsão de tempo de permanência (25 pts) |
+| **👤 Usuários** | `/api/usuarios` | CRUD completo, validação de usuário único |
+| **📍 Zonas** | `/api/zonas` | CRUD completo, organização por letra |
+| **🏢 Pátios** | `/api/patios` | CRUD completo, validação de dependências |
+| **📊 StatusGrupos** | `/api/statusgrupos` | CRUD completo, hierarquia de status |
+| **✅ Status** | `/api/statuses` | CRUD completo, relacionamento com grupos |
+| **🏍️ Motos** | `/api/motos` | CRUD completo, filtros, validações |
 
 ### **Padrões Implementados:**
 - ✅ **Paginação**: `?page=1&pageSize=20` em todas as listagens
 - ✅ **HATEOAS**: Links de navegação em respostas paginadas  
 - ✅ **Filtros**: Busca por placa nas motos
 - ✅ **Validações**: Integridade referencial e unicidade
-- ✅ **Status Codes**: 200, 201, 204, 400, 404 adequadamente utilizados
+- ✅ **Status Codes**: 200, 201, 204, 400, 401, 404 adequadamente utilizados
+- ✅ **JWT**: Autenticação Bearer token (10 pts)
+- ✅ **Health Checks**: Endpoint de monitoramento (10 pts)
+- ✅ **Versionamento**: Suporte a múltiplas versões da API (10 pts)
 
 ---
 
 ## 🧪 Exemplos de Uso dos Endpoints
 
-### **1. Criar Status Grupo**
+### **Novos Endpoints Implementados:**
+
+#### **1. Health Check**
+```bash
+GET /health
+
+# Resposta: 200 OK
+{
+  "status": "Healthy",
+  "checks": [
+    {
+      "name": "database",
+      "status": "Healthy",
+      "description": null,
+      "duration": 45.2
+    }
+  ],
+  "totalDuration": 50.5
+}
+```
+
+#### **2. Login com JWT**
+```bash
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "usuario": "admin",
+  "senha": "admin@123"
+}
+
+# Resposta: 200 OK
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "usuario": "admin",
+  "expiresAt": "2024-11-20T23:30:00Z"
+}
+
+# Para usar o token:
+# No Swagger: Clique em "Authorize" e cole o token
+# Ou no header: Authorization: Bearer {token}
+```
+
+#### **3. Previsão ML.NET - Tempo de Permanência**
+```bash
+POST /api/ml/previsao-permanencia
+Content-Type: application/json
+
+{
+  "zonaId": 1,
+  "patioId": 1,
+  "statusId": 1,
+  "diaSemana": 1
+}
+
+# Resposta: 200 OK
+{
+  "tempoPrevistoHoras": 27.5,
+  "tempoPrevistoDias": 2,
+  "mensagem": "Moto deve permanecer de 2 a 3 dias",
+  "dadosEntrada": {
+    "zonaId": 1,
+    "patioId": 1,
+    "statusId": 1,
+    "diaSemana": 1
+  }
+}
+```
+
+---
+
+### **Endpoints CRUD Existentes:**
+
+#### **4. Criar Status Grupo**
 ```bash
 POST /api/statusgrupos
 Content-Type: application/json
@@ -396,14 +708,40 @@ DELETE /api/motos/1
 
 ## 📖 Documentação Swagger
 
-A API possui documentação completa via Swagger/OpenAPI com:
+A API possui documentação completa via Swagger/OpenAPI seguindo as **melhores práticas REST e HTTP**:
 
-✅ **Descrições detalhadas** de todos os endpoints  
-✅ **Parâmetros documentados** com tipos e validações  
-✅ **Exemplos de payloads** para requisições e respostas  
-✅ **Modelos de dados** completamente descritos  
-✅ **Status codes** com suas respectivas descrições  
-✅ **Agrupamento por entidades** para melhor navegação  
+### ✅ Boas Práticas Implementadas
+
+**Verbos HTTP Corretos:**
+- `GET` - Recuperar recursos (listagens e detalhes)
+- `POST` - Criar novos recursos
+- `PUT` - Atualizar recursos existentes
+- `DELETE` - Remover recursos
+
+**Status Codes Adequados:**
+| Code | Uso na API |
+|------|------------|
+| **200 OK** | Sucesso em GET e PUT |
+| **201 Created** | Recurso criado (POST) + Location header |
+| **204 No Content** | Sucesso em DELETE (sem corpo) |
+| **400 Bad Request** | Dados inválidos, validações falharam |
+| **404 Not Found** | Recurso não encontrado |
+| **409 Conflict** | Conflito (duplicação de dados únicos) |
+
+**Recursos da Documentação:**
+- ✅ **Descrições detalhadas** de todos os endpoints com exemplos de uso
+- ✅ **Status codes documentados** para cada operação (sucesso e erro)
+- ✅ **Parâmetros documentados** com tipos, validações e valores padrão
+- ✅ **Exemplos de payloads** para requisições e respostas
+- ✅ **Modelos de dados** completamente descritos com DTOs
+- ✅ **Validações explicadas** (unicidade, integridade referencial)
+- ✅ **HATEOAS** - Links de navegação em respostas paginadas
+- ✅ **Agrupamento por entidades** para melhor navegação
+
+**Acesso ao Swagger:**
+```
+http://localhost:5111/swagger
+```
 
 ---
 
@@ -418,12 +756,28 @@ A API possui documentação completa via Swagger/OpenAPI com:
 
 ## 🎯 Benefícios da Solução
 
+### **Operacionais:**
 - 📈 **40% de aumento** na produtividade operacional
 - ⏱️ **Localização em segundos** em vez de minutos
 - 📉 **Redução de perdas** e erros de inventário  
 - 🔍 **Rastreabilidade completa** de todas as operações
 - 🏢 **Escalabilidade** para mais de 100 filiais
 - 🛡️ **Auditoria** e controle de alterações
+
+### **Técnicos:**
+- 🔐 **Segurança robusta** com JWT (autenticação e autorização)
+- 🏥 **Monitoramento proativo** com Health Checks
+- 🤖 **Inteligência artificial** para previsões com ML.NET
+- 📦 **API versionada** para evolução sem breaking changes
+- 📊 **Documentação completa** com Swagger/OpenAPI
+- ✅ **Boas práticas REST** em todos os endpoints
+
+### **De Negócio:**
+- 💰 **Redução de custos** operacionais
+- ⚡ **Tomada de decisão** baseada em dados (ML)
+- 📈 **Previsibilidade** de permanência de veículos
+- 🔄 **Integração fácil** com outros sistemas via API
+- 🛠️ **Manutenção simplificada** com código limpo e documentado
 
 ---
 

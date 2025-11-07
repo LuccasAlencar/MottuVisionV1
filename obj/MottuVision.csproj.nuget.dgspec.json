@@ -1,32 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\labsfiap\\Desktop\\MottuVisionV1\\MottuVision.csproj": {}
+    "C:\\Users\\lucca\\Desktop\\MottuVisionV1\\MottuVision.csproj": {}
   },
   "projects": {
-    "C:\\Users\\labsfiap\\Desktop\\MottuVisionV1\\MottuVision.csproj": {
+    "C:\\Users\\lucca\\Desktop\\MottuVisionV1\\MottuVision.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\labsfiap\\Desktop\\MottuVisionV1\\MottuVision.csproj",
+        "projectUniqueName": "C:\\Users\\lucca\\Desktop\\MottuVisionV1\\MottuVision.csproj",
         "projectName": "MottuVision",
-        "projectPath": "C:\\Users\\labsfiap\\Desktop\\MottuVisionV1\\MottuVision.csproj",
-        "packagesPath": "C:\\Users\\labsfiap\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\labsfiap\\Desktop\\MottuVisionV1\\obj\\",
+        "projectPath": "C:\\Users\\lucca\\Desktop\\MottuVisionV1\\MottuVision.csproj",
+        "packagesPath": "C:\\Users\\lucca\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\lucca\\Desktop\\MottuVisionV1\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\labsfiap\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\lucca\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -51,9 +44,21 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Asp.Versioning.Http": {
+              "target": "Package",
+              "version": "[8.1.0, )"
+            },
+            "Asp.Versioning.Mvc.ApiExplorer": {
+              "target": "Package",
+              "version": "[8.1.0, )"
+            },
             "BCrypt.Net-Next": {
               "target": "Package",
               "version": "[4.0.3, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.8, )"
             },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
@@ -68,6 +73,14 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[8.0.8, )"
+            },
+            "Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.8, )"
+            },
+            "Microsoft.ML": {
+              "target": "Package",
+              "version": "[3.0.1, )"
             },
             "Oracle.EntityFrameworkCore": {
               "target": "Package",
@@ -84,6 +97,10 @@
             "Swashbuckle.AspNetCore.Annotations": {
               "target": "Package",
               "version": "[6.6.2, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.0.2, )"
             }
           },
           "imports": [
@@ -105,7 +122,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.304/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
